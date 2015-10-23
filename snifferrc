@@ -1,0 +1,53 @@
+[source]
+# Dir where various folders containing source codes or text files are located.
+# This directory will be 'walked' and each subdirectory inside this directory
+# will be considered as a separate directory. 
+#dir = /home/dilawar/Works/hpc21/2013ee668/Assignments/A5/Submissions
+dir = /home/dilawar/Bhandar/Plagiarism/EE671
+
+# This is the regular expression of the names of files. If you want to compare
+# all files leave it empty or .* will do. 
+regex = .*(cir|spice)$
+
+# Specify language of file.
+# Available : vhdl, verilog, ctype, text, pdf 
+language = text
+
+# Compiler. Currently this is of no use.
+compiler = ghdl
+
+# make compare true if you want to compare. If this is not set to true, it won't
+# match. This is here for development purpose. In most cases, this should be
+# true.
+compare = true
+
+# Dump the results of analysis in directory of database.
+analyze_result = true 
+
+# Currently useless.
+send_email = false
+
+[filter]
+# If this regex is found in the text of file, then the file is ignored. 
+regex = ((entity\s+QueueTb)|(Madhav\s+Desai))
+regex_flags = DOTALL,IGNORECASE 
+
+# larger size will be ignored. -1 for all. In Kb
+max_size = -1
+
+# Max words a text file can contains. -1 for 2^32.
+max_words = 8000
+# Mininum words a text files must contain.
+min_words = 100
+
+[algorithm]
+# Available algoritms : difflib, quick, 
+name = difflib
+
+[database]
+# path : Path where sqlite3 database should be saved. 
+path = /home/dilawar/Downloads/
+
+# Name of the database.
+name = sniffer.sqlite3 
+#name = :memory:

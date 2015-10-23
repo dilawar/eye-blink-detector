@@ -1,0 +1,22 @@
+---
+layout: page
+title: Install
+comments: true
+repository_url: http://github.com/dilawar/sniffer
+---
+
+Download the zip file from {{page.repository_url}} and use `python-setuptools`
+to install it. I recommend using `pip` or `easy_install`; it install it from
+pypi where a stable version is kept.
+
+    $ pip install code-sniffer 
+
+If you are behind proxy, check out how to use `pip` behind proxy. You can also
+download the code from its [gihub repository]({{page.repository_url}}). Run the
+following command
+
+    $ python setup.py build 
+    $ sudo python setup.py install 
+
+Any of these two method will install code-sniffer to your system
+

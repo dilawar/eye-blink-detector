@@ -1,0 +1,70 @@
+[source]
+# Dir where various folders containing source codes or text files are located.
+# Each student must have his own directory under this directory. For example, if
+# there are three students Tinku, Pinky, and Bablu; you should keep their
+# directories as following.
+# 
+# dir
+# |
+# +-- Tinku
+# |   |
+# |   +-- a.vhd
+# |   |
+# |   +-- b.vhd
+# +-- Pinky 
+# |   |
+# |   +-- que1.vhd
+# |   |
+# |   +-- test.vhd
+# |               
+# +-- Bablu
+# |   |
+# |   +-- a.vhd
+# |   |
+# |   +-- Test
+# |   |   |
+# |   |   +-- test.vhd
+# |   +-- b.vhd
+# 
+dir = /home/dilawar/Bhandar/Plagiarism/EE671
+
+# These are the extension of files we want of files. If you want to compare
+# all files leave it empty or .* will do. 
+extension = vhd, vhdl
+
+# Specify language of file.
+# Available : vhdl, verilog, ctype, text, pdf 
+language = vhdl
+
+# Dump the results of analysis in directory of database.
+dump_result = true 
+
+[filter]
+
+# A list of text which if found in file then reject the file. 
+# textA >> textB; reject file if  textA is followed by textB
+# textA || textB; reject file if textA or textB is found.
+# textA && textB; reject if both text are found.
+ignore_text = entity QueuTb >> Madhav Desai
+
+# If you know python re library then you can specify the regular expression
+# which should be ignore.
+regex = ((entity\s+QueueTb)|(Madhav\s+Desai))
+regex_flags = DOTALL,IGNORECASE 
+
+# larger size will be ignored. -1 for infinite size. In Kb
+max_size = -1
+
+# Max words a text file can contains. -1 for 2^32.
+max_words = 8000
+# Mininum words a text files must contain.
+min_words = 100
+
+[algorithm]
+# Available algoritms : difflib, quick, 
+name = difflib
+
+[database]
+# path : Path where sqlite3 database should be saved. 
+path = /home/dilawar/Downloads/
+

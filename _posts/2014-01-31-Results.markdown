@@ -1,0 +1,34 @@
+---
+layout: page
+---
+
+In `database` directory (in this configuration `/home/dilawar/Downloads`), you
+will find following files.
+
+~~~
+accused.sh
+convicted.sh
+high_serverity.csv
+identical_serverity.csv
+mild_serverity.csv
+moderate_serverity.csv
+sniffer.sqlite3
+summary.sh
+veryhigh_serverity.csv
+~~~
+
+The shell scripts are standalone shell script with graphviz graph in them.
+Running them will produce a graphviz graph. Matched files are listed according
+to severity level. Let's see a file which has very high level of matching; it is
+named `veryhigh_serverity.csv`.
+
+~~~
+{% include text/veryhigh_serverity.csv %}
+~~~
+
+We can now run a shell script `convicted.sh` to see a graph which displays how
+much copying is done by the class.
+
+![Convicted students]({{site.url}}/images/convicted.png)
+
+The number on edges is the number of file matching between these two students.
