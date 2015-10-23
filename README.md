@@ -12,3 +12,6 @@ Process a given video for blinks. Very fast.
 # blinky_gui.py
 
 Gui version of blinky.py. Only for testing. Very slow.
+
+For more details see the [project
+page](https://dilawar.github.io/eye-blink-detector).
