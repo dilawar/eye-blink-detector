@@ -135,6 +135,7 @@ def find_blinks_using_pixals(data, plot = False):
 
     # Shift because of convolution.
     x = int(N) / 2
+    print x, len(t), len(w), len(smoothW)
     bT, yy = t[x-1:-x], w[x-1:-x] - smoothW
 
     if plot:
