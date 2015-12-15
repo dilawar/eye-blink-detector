@@ -119,11 +119,12 @@ def onmouse(event, x, y, flags, params):
 def get_bounding_box(frame):
     global current_frame_, bbox_
     current_frame_ = frame.copy()
-    cv2.namedWindow('Bound_eye')
-    cv2.setMouseCallback('Bound_eye', onmouse)
+    title = "Bound eye and press 'q' to quit."
+    cv2.namedWindow(title)
+    cv2.setMouseCallback(title, onmouse)
     clone = frame.copy()
     while True:
-        cv2.imshow("Bound_eye", current_frame_)
+        cv2.imshow(title, current_frame_)
         key = cv2.waitKey(1) & 0xFF
         if key == ord("c"):
             current_frame_ = clone.copy()

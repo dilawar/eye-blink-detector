@@ -98,7 +98,12 @@ def animate(i):
     t = float(i) / fps_
     ret, img = cap_.read()
     (x0, y0), (x1, y1) = box_
-    frame = img[y0:y1,x0:x1]
+    try:
+        frame = img[y0:y1,x0:x1]
+    except Exception as e:
+        print('[WARN] Frame %s dropped' % i)
+        return lines_.values(), time_text_
+
     gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
 
     if save_video_:
