@@ -1,2 +1,6 @@
 #!/bin/bash
-python ./blinky.py -f ./_videos/2015-10-10-k3.webm 
+if [ $# -lt 1 ]; then
+    echo "USAGE: $0 filename"
+    exit
+fi
+python ./blinky.py -f $1
