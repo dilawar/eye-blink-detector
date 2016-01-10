@@ -70,11 +70,32 @@ def draw_stars(current, max_lim):
             )
     print(msg)
 
+def accept_contour_as_possible_eye( contour, threshold = 0.1 ):
+    # The eye has a certain geometrical shape. If it can not be approximated by
+    # an ellipse which major/minor < 0.8, ignore it.
+    return True
+    if len(contour) < 5:
+        # Too tiny to be an eye
+        return True
+    ellipse = cv2.fitEllipse( contour )
+    axes = ellipse[1]
+    minor, major = axes
+    if minor / major > threshold:
+        # Cool, also the area of ellipse and contour area cannot ve very
+        # different.
+        cntArea = cv2.contourArea( contour )
+        ellipseArea = np.pi * minor * major 
+        if cntArea < 1:
+            return False
+        return True
+    else:
+        return False
+
 def process_frame(frame):
     # Find edge in frame
     s = np.mean(frame)
     edges = cv2.Canny(frame, 50, 250)
-    cnts = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    cnts = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
     cntImg = np.ones(frame.shape)
     merge_contours(cnts[0], cntImg)
 
@@ -86,9 +107,9 @@ def process_frame(frame):
     res = []
     for c in cnts[0]:
         c = cv2.convexHull(c)
-        cv2.fillConvexPoly(hullImg, c, 0, 8)
-        res.append(cv2.contourArea(c))
-
+        if accept_contour_as_possible_eye( c ):
+            cv2.fillConvexPoly(hullImg, c, 0, 8)
+            res.append(cv2.contourArea(c))
     hullImg = np.array((1-hullImg) * 255, dtype = np.uint8)
     return frame, hullImg, sum(res), s
 
@@ -173,7 +194,7 @@ def process_video(video_file_name,  args = {}):
         vec.append(res)
         rawVec.append(s)
         result = np.concatenate((infile, outfile), axis=1)
-        cv2.imshow('Bound_eye', result)
+        #cv2.imshow('Bound_eye', result)
         if wait_for_exit_key():
             break
     cv2.destroyAllWindows()

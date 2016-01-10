@@ -51,9 +51,7 @@ else:
 
 axes_ = { 'raw' : ax1, 'raw_twin' : ax2, 'blink' : ax3, 'blink_twin' : ax4 }
 lines_["rawA"] = ax1.plot([], [], color='blue')[0]
-lines_["rawB"] = ax2.plot([], [], color='red')[0]
 lines_['blinkA'] = ax3.plot([], [], 's', color = 'blue')[0]
-lines_['blinkB'] = ax4.plot([], [], 'p', color = 'red')[0]
 
 time_template_ = 'Time = %.1f s'
 time_text_ = fig_.text(0.05, 0.9, '', transform=axes_['blink'].transAxes)
@@ -67,7 +65,7 @@ def init():
     global axes_, lines_
     global box_, fps_
     global cap_, args_
-    cap_ = cv2.VideoCapture(0)
+    cap_ = cv2.VideoCapture( args_['camera'] )
     fps_ = cap_.get(cv2.cv.CV_CAP_PROP_FPS)
     if fps_ < 1:
         print('[WARN] failed to get FPS. Setting to 15')
@@ -111,37 +109,32 @@ def animate(i):
     if save_video_:
         fig_ax_.imshow(frame[::2,::2], interpolation='nearest')
     else:
-        cv2.imshow('image', frame)
+        #cv2.imshow('image', frame)
         cv2.waitKey(1)
 
     inI, outI, edge, pixal = webcam.process_frame(frame)
-    cv2.imshow('Convex hull of eye', outI)
+    cv2.imshow('Eye', np.concatenate((frame, outI)))
 
     tvec_.append(t); y1_.append(edge); y2_.append(pixal)
     update_axis_limits(axes_['raw'], t, edge)
     update_axis_limits(axes_['raw_twin'], t, pixal)
 
-    lines_['rawA'].set_data(tvec_, y1_)
-    lines_['rawB'].set_data(tvec_, y2_)
-    
-    #return lines_.values(), time_text_ 
+    # For how long we want to display the activity in gui (in seconds,
+    # mulitplied by fps_)
+    #diplay_for = int(1 * 60 * fps_ )
 
-    if i % int(fps_) == 0 and i > int(fps_)*5:
-        data_ = np.array((tvec_, y1_, y2_)).T
+    #tvec, y1 = tvec_[-diplay_for:], y1_[-diplay_for:]
+    lines_['rawA'].set_data(tvec_, y1_)
+    
+    if i % int(fps_*0.1) == 0:
+        data_ = np.array((tvec_, y1_)).T
         try:
             tA, bA = extract.find_blinks_using_edge(data_[:,:])
         except Exception as e:
             print('[WARN] Failed to detect blink data using egdes in frame %s' % i)
             tA, bA = [], []
-        try:
-            tB, bB = extract.find_blinks_using_pixals(data_[:,:])
-        except Exception as e:
-            print('[WARN] Failed to detect blink using pixals in frame %s' % i)
-            tB, bB = [], []
         update_axis_limits(axes_['blink'], t, 1)
-        update_axis_limits(axes_['blink_twin'], t, 1)
-        lines_['blinkA'].set_data(tA, 0.9*np.ones(len(tA)))
-        lines_['blinkB'].set_data(tB, np.ones(len(tB)))
+        lines_['blinkA'].set_data(tA, np.ones(len(tA)))
 
     time_text_.set_text(time_template_ % t)
     return lines_.values(), time_text_
@@ -155,10 +148,6 @@ def get_blinks( ):
         , init_func=init
         , blit = False
         )
-
-    if save_video_:
-        print("Writing to video file output.mp4")
-        ani_.save('output.mp4', fps=10, extra_args=['-vcodec', 'libx264'])
     plt.show( )
 
 def main():
@@ -174,6 +163,12 @@ if __name__ == '__main__':
     # Argument parser.
     description = '''Detect eyeblink in live camera feed'''
     parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('--camera', '-c'
+        , required = False
+        , default = 0
+        , type = int
+        , help = 'Camera index. Default 0'
+        )
     class Args: pass 
     args = Args()
     parser.parse_args(namespace=args)

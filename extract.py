@@ -105,12 +105,11 @@ def find_blinks_using_edge(data, plot = False, **kwargs):
     # Smooth out the vectors.
     yvec = np.convolve(y, window, 'same')
     records['smooth'] = (t, y)
-    newY = 0.5*yvec.mean() - yvec
-    newY = newY + np.fabs(newY)
+    newY = yvec - yvec.min()
     window = np.ones(window_size_)/(window_size_)
     yy = np.convolve(newY, window, 'same')
     blinks = []
-    while yy.max() > 10:
+    while yy.max() > yy.mean() + 1.5 * yy.std() :
         i = np.argmax(yy)
         isBlink, a = get_blink(i, yy)
         if isBlink:
