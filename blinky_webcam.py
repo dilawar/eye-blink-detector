@@ -124,7 +124,7 @@ def animate(i):
     lines_['rawA'].set_data(tvec_, y1_)
     lines_['rawB'].set_data(tvec_, y2_)
     
-    return lines_.values(), time_text_ 
+    #return lines_.values(), time_text_ 
 
     if i % int(fps_) == 0 and i > int(fps_)*5:
         data_ = np.array((tvec_, y1_, y2_)).T
