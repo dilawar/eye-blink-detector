@@ -69,6 +69,10 @@ def init():
     global cap_, args_
     cap_ = cv2.VideoCapture(0)
     fps_ = cap_.get(cv2.cv.CV_CAP_PROP_FPS)
+    if fps_ < 1:
+        print('[WARN] failed to get FPS. Setting to 15')
+        fps_ = 15 
+
     ret, fstFrame = cap_.read()
     box_ = webcam.get_bounding_box(fstFrame)
     cv2.destroyWindow('Bound_eye')
@@ -96,6 +100,7 @@ def animate(i):
 
     t = float(i) / fps_
     ret, img = cap_.read()
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     (x0, y0), (x1, y1) = box_
     try:
         frame = img[y0:y1,x0:x1]
@@ -103,15 +108,15 @@ def animate(i):
         print('[WARN] Frame %s dropped' % i)
         return lines_.values(), time_text_
 
-    gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-
     if save_video_:
         fig_ax_.imshow(frame[::2,::2], interpolation='nearest')
     else:
         cv2.imshow('image', frame)
         cv2.waitKey(1)
 
-    inI, outI, edge, pixal = webcam.process_frame(gray)
+    inI, outI, edge, pixal = webcam.process_frame(frame)
+    cv2.imshow('Convex hull of eye', outI)
+
     tvec_.append(t); y1_.append(edge); y2_.append(pixal)
     update_axis_limits(axes_['raw'], t, edge)
     update_axis_limits(axes_['raw_twin'], t, pixal)
@@ -119,10 +124,20 @@ def animate(i):
     lines_['rawA'].set_data(tvec_, y1_)
     lines_['rawB'].set_data(tvec_, y2_)
     
+    return lines_.values(), time_text_ 
+
     if i % int(fps_) == 0 and i > int(fps_)*5:
         data_ = np.array((tvec_, y1_, y2_)).T
-        tA, bA = extract.find_blinks_using_edge(data_[:,:])
-        tB, bB = extract.find_blinks_using_pixals(data_[:,:])
+        try:
+            tA, bA = extract.find_blinks_using_edge(data_[:,:])
+        except Exception as e:
+            print('[WARN] Failed to detect blink data using egdes in frame %s' % i)
+            tA, bA = [], []
+        try:
+            tB, bB = extract.find_blinks_using_pixals(data_[:,:])
+        except Exception as e:
+            print('[WARN] Failed to detect blink using pixals in frame %s' % i)
+            tB, bB = [], []
         update_axis_limits(axes_['blink'], t, 1)
         update_axis_limits(axes_['blink_twin'], t, 1)
         lines_['blinkA'].set_data(tA, 0.9*np.ones(len(tA)))
@@ -151,14 +166,8 @@ def main():
     try:
         get_blinks()
     except Exception as e:
-        pass
+        print('[ERR] Failed %s' % e)
     cap_.release()
-    outfile = '%s_out.csv' % vidFile
-    print("[INFO] Writing to file %s" % outfile)
-    np.savetxt(outfile, data_, delimiter=',' ,header="time,edge,pixal")
-    outfile = '%s_out.csv' % vidFile
-    print("[INFO] Writing to file %s" % outfile)
-    np.savetxt(outfile, data_, delimiter=',' ,header="time,edge,pixal")
 
 if __name__ == '__main__':
     import argparse

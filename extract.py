@@ -128,7 +128,11 @@ def find_blinks_using_pixals(data, plot = False):
     windowSizeSec = 6
     N = windowSizeSec*32.0
     window = np.ones(N)/N
-    smoothW = np.convolve(w, window, 'valid')
+    try:
+        smoothW = np.convolve(w, window, 'valid')
+    except Exception as e:
+        print('[WARN] Can not convolve with window size %s' % windowSizeSec)
+        smoothW = w 
     if plot:
         pylab.subplot(2, 1, 1)
         pylab.plot(t, w, linewidth=0.5, label = "W")
