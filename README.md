@@ -1,3 +1,8 @@
+First frame of video/camera is presented to the user to select the box where
+your eyes it. Use mouse to left-click at a point, drag the cursor to another
+point, and release the left-button. You won't see a box unless you are done
+dragging. Once box is visible press `q`. The process will start.
+
 # blinky.py
 
 Process a given video for blinks. Very fast.
@@ -13,5 +18,8 @@ Process a given video for blinks. Very fast.
 
 Gui version of blinky.py. Only for testing. Very slow.
 
-For more details see the [project
-page](https://dilawar.github.io/eye-blink-detector).
+
+# blinky_webcam.py 
+
+Process the live feed from given camera index ( default 0 ). Only for demo
+purpose. 
