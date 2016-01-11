@@ -14,6 +14,7 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import numpy as np
+import gnuplotlib as gplt
 import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 import extract
@@ -62,7 +63,7 @@ y2_ = []
 args_ = None
 
 def init():
-    global axes_, lines_
+    # global axes_, lines_
     global box_, fps_
     global cap_, args_
     cap_ = cv2.VideoCapture( args_['camera'] )
@@ -77,7 +78,7 @@ def init():
     cv2.destroyAllWindows()
     cv2.waitKey(1)
     cv2.destroyAllWindows()
-    return lines_.values()
+    # return lines_.values()
 
 def update_axis_limits(ax, x, y):
     xlim = ax.get_xlim()
@@ -90,11 +91,11 @@ def update_axis_limits(ax, x, y):
 
 def animate(i):
     global data_
-    global time_text_
+    # global time_text_
     global box_
     global tvec_, y1_, y2_
     global cap_
-    global fig_ax_
+    # global fig_ax_
 
     t = float(i) / fps_
     ret, img = cap_.read()
@@ -119,43 +120,41 @@ def animate(i):
     update_axis_limits(axes_['raw'], t, edge)
     update_axis_limits(axes_['raw_twin'], t, pixal)
 
-    # For how long we want to display the activity in gui (in seconds,
-    # mulitplied by fps_)
-    #diplay_for = int(1 * 60 * fps_ )
-
-    #tvec, y1 = tvec_[-diplay_for:], y1_[-diplay_for:]
-    lines_['rawA'].set_data(tvec_, y1_)
-    
+    tA, bA = [0], [0]
     if i % int(fps_*0.1) == 0:
         data_ = np.array((tvec_, y1_)).T
         try:
             tA, bA = extract.find_blinks_using_edge(data_[:,:])
         except Exception as e:
             print('[WARN] Failed to detect blink data using egdes in frame %s' % i)
-            tA, bA = [], []
-        update_axis_limits(axes_['blink'], t, 1)
-        lines_['blinkA'].set_data(tA, np.ones(len(tA)))
+            tA, bA = [0], [0]
 
-    time_text_.set_text(time_template_ % t)
-    return lines_.values(), time_text_
+    gplt.plot( ( np.array(tvec_[-1000:]), np.array( y1_[-1000:] ))
+            # , ( np.array(tA), np.array(bA), {} )
+            , title = 'Blink detection. Running window 1000 frames'
+            , terminal = 'x11'
+            )
+
 
 def get_blinks( ):
     global ani_, cap_
     global save_video_
-    ani_ = anim.FuncAnimation(fig_
-        , animate
-        , interval = 1
-        , init_func=init
-        , blit = False
-        )
-    plt.show( )
+    i = 0
+    while True:
+        i += 1
+        animate( i )
+
+def close_all( ):
+    global cap_
+    cap.release()
 
 def main():
     global data_, args_
+    init()
     try:
         get_blinks()
     except Exception as e:
-        print('[ERR] Failed %s' % e)
+        print('[ERR] Failed to get blinks: %s' % e)
     cap_.release()
 
 if __name__ == '__main__':
@@ -173,4 +172,10 @@ if __name__ == '__main__':
     args = Args()
     parser.parse_args(namespace=args)
     args_ = vars(args)
-    main()
+    try:
+        main()
+    except KeyboardInterrupt as e:
+        print('[INFO] Keyboard interrupt.Quitting')
+        close_all()
+        quit()
+
