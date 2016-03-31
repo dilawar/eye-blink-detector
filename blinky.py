@@ -23,6 +23,9 @@ import numpy as np
 def main(args):
     # Extract video first
     data = webcam.video2csv(args)
+    if len(data) == 0:
+        print('[WARN] Could not load data. Quitting.')
+        return None
     edgyBlinks = extract.find_blinks_using_edge(data)
     outfile = "%s_blinks_using_edges.csv" % args['video_device']
     print("[INFO] Writing to outfile %s" % outfile)

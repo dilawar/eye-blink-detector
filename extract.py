@@ -123,7 +123,6 @@ def find_blinks_using_edge(data, plot = False, **kwargs):
 
 def find_blinks_using_pixals(data, plot = False):
     t, y, w = data[:,0], data[:,1], data[:,2]
-    # must be odd.
     windowSizeSec = 6
     N = windowSizeSec*32.0
     window = np.ones(N)/N
@@ -167,7 +166,7 @@ def find_blinks_using_pixals(data, plot = False):
     return xvec, yvec
 
 def process_csv(csv_file):
-    data = np.genfromtxt(csv_file, skiprows=1, delimiter=",")
+    data = np.loadtxt(csv_file, skiprows=1, delimiter=",")
     d = data #[:1000,:]
     blinkA = find_blinks_using_edge(d)
     print("Total blink using edges: %s" % len(blinkA[0]))

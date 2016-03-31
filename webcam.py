@@ -61,6 +61,7 @@ def draw_stars(current, max_lim):
     """
     global current_length_, max_length_
     stride = int( max_lim / float(max_length_)) 
+    print('[DEBUG] Stride %s' % stride)
     steps = int(current / float(stride))
     if steps == current_length_:
         return
@@ -189,7 +190,8 @@ def process_video(video_device,  args = {}):
             nFrames += 1
             break
         nFrames += 1.0
-        draw_stars(nFrames, totalFrames)
+        # fixme: this does not work with camera
+        #draw_stars(nFrames, totalFrames)
         tvec.append(nFrames*1.0/fps)
         vec.append(res)
         rawVec.append(s)
@@ -198,7 +200,7 @@ def process_video(video_device,  args = {}):
         if wait_for_exit_key():
             break
     cv2.destroyAllWindows()
-    if os.path.isfile( video_device ):
+    if os.path.isfile( str(video_device) ):
         outfile = "%s_out.csv" % (video_device)
     else:
         outfile = 'cam_%s_out.csv' % video_device 
@@ -208,8 +210,5 @@ def process_video(video_device,  args = {}):
     return data
 
 def video2csv(args):
-    fileName = args['video_device']
-    if os.path.exists(str(fileName)):
-        return process_video(fileName, args = args)
-    else:
-        raise UserWarning("File %s not found. Probably a camera!" % fileName)
+    device = args['video_device']
+    return process_video(device, args = args)
