@@ -155,9 +155,9 @@ def get_bounding_box(frame):
     cv2.destroyWindow('Bound_eye')
     return bbox_
 
-def process_video(video_file_name,  args = {}):
+def process_video(video_device,  args = {}):
     global current_frame_, bbox_
-    cap = cv2.VideoCapture(video_file_name)
+    cap = cv2.VideoCapture(video_device)
     totalFrames = cap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT)
     _logger.info("Total frames: %s" % totalFrames)
     fps = cap.get(cv2.cv.CV_CAP_PROP_FPS)
@@ -198,15 +198,18 @@ def process_video(video_file_name,  args = {}):
         if wait_for_exit_key():
             break
     cv2.destroyAllWindows()
-    outfile = "%s_out.csv" % (video_file_name)
+    if os.path.isfile( video_device ):
+        outfile = "%s_out.csv" % (video_device)
+    else:
+        outfile = 'cam_%s_out.csv' % video_device 
     _logger.info("Writing to %s" % outfile)
     data = np.array((tvec, vec, rawVec)).T
     np.savetxt(outfile, data, delimiter=",", header = "time,area,weight")
     return data
 
 def video2csv(args):
-    fileName = args['video_file']
-    if os.path.exists(fileName):
+    fileName = args['video_device']
+    if os.path.exists(str(fileName)):
         return process_video(fileName, args = args)
     else:
-        raise UserWarning("File %s not found" % fileName)
+        raise UserWarning("File %s not found. Probably a camera!" % fileName)

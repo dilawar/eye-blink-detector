@@ -24,7 +24,7 @@ def main(args):
     # Extract video first
     data = webcam.video2csv(args)
     edgyBlinks = extract.find_blinks_using_edge(data)
-    outfile = "%s_blinks_using_edges.csv" % args['video_file']
+    outfile = "%s_blinks_using_edges.csv" % args['video_device']
     print("[INFO] Writing to outfile %s" % outfile)
     np.savetxt(outfile, np.array(edgyBlinks).T, delimiter=","
             , header = "time,blinks")
@@ -43,9 +43,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=description)
     class Args: pass 
     args = Args()
-    parser.add_argument('--video-file', '-f'
-        , required = True
-        , help = 'Path of the video file'
+    parser.add_argument('--video-device', '-f'
+        , required = False
+        , default = 0
+        , help = 'Path of the video file or camera index. default camera 0'
         )
     parser.add_argument('--bbox', '-b'
         , required = False
