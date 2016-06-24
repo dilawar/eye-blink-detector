@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 """Extract blink data and visualize it using matplotlib.
 
 
@@ -157,6 +158,7 @@ def main():
     try:
         get_blinks()
     except Exception as e:
+        print( '[WARN] Failed to get blinks: %s' % e )
         pass
     cap_.release()
     outfile = '%s_out.csv' % vidFile
