@@ -23,3 +23,9 @@ Gui version of blinky.py. Only for testing. Very slow.
 
 Process the live feed from given camera index ( default 0 ). Only for demo
 purpose. 
+
+## Dependencies
+
+- gnuplotlib. Use the command `sudo pip install gnuplotlib` 
+- gnuplot
+
