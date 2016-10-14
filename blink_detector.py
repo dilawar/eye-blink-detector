@@ -97,7 +97,7 @@ def process( args ):
     towrite = []
     csvFile = '%s_eye_bink_index.csv' % args.video_device 
     with open( csvFile, 'w') as f:
-        f.write( 'time, open-eye\n')
+        f.write( 'time,value\n')
     
     while True:
         totalFramesDone = cap_.get( cv2.cv.CV_CAP_PROP_POS_FRAMES ) 
