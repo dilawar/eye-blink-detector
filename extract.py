@@ -97,7 +97,9 @@ def get_blink(i, yy, threshold = 10.0):
     return True, res
 
 def find_blinks_using_edge(data, plot = False, **kwargs):
-    """Find location of blinks in data"""
+    """Find location of blinks in data
+    
+    """
     global window_size_
     records = OrderedDict()
     window = np.ones(window_size_)/window_size_

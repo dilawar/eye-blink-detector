@@ -12,6 +12,7 @@ __email__            = ""
 __status__           = "Development"
 
 import cv2
+import numpy as np
 
 bbox_ = None
 current_frame_ = None
@@ -50,3 +51,63 @@ def get_bounding_box(frame):
 
 def toGrey( frame ):
     return cv2.cvtColor( frame, cv2.COLOR_BGR2GRAY )
+
+
+def merge_contours(cnts, img):
+    """Merge these contours together. And create an image"""
+    for c in cnts:
+        hull = cv2.convexHull(c)
+        cv2.fillConvexPoly(img, hull, 0)
+    return img
+
+
+def accept_contour_as_possible_eye( contour, threshold = 0.1 ):
+    # The eye has a certain geometrical shape. If it can not be approximated by
+    # an ellipse which major/minor < 0.8, ignore it.
+    return True
+    if len(contour) < 5:
+        # Too tiny to be an eye
+        return True
+    ellipse = cv2.fitEllipse( contour )
+    axes = ellipse[1]
+    minor, major = axes
+    if minor / major > threshold:
+        # Cool, also the area of ellipse and contour area cannot ve very
+        # different.
+        cntArea = cv2.contourArea( contour )
+        ellipseArea = np.pi * minor * major 
+        if cntArea < 1:
+            return False
+        return True
+    else:
+        return False
+
+
+def compute_open_eye_index(frame):
+    """ Accepts a frame and compute the hull-image of eye.
+
+        reutrn hull image and open-eye index. 
+        Larger openEyeIndex means that eye was open.
+    """
+    # Find edge in frame
+    s = np.mean(frame)
+    edges = cv2.Canny(frame, s + np.std( frame), np.max( frame) - np.std(frame) )
+    cnts = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
+    cntImg = np.ones(frame.shape)
+    merge_contours(cnts[0], cntImg)
+
+    # cool, find the contour again and convert again. Sum up their area.
+    im = np.array((1-cntImg) * 255, dtype = np.uint8)
+    cnts = cv2.findContours(im, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+    hullImg = np.ones(frame.shape)
+    openEyeVals = []
+    for c in cnts[0]:
+        c = cv2.convexHull(c)
+        if accept_contour_as_possible_eye( c ):
+            cv2.fillConvexPoly(hullImg, c, 0, 8)
+            openEyeVals.append(cv2.contourArea(c))
+    hullImg = np.array((1-hullImg) * 255, dtype = np.uint8)
+    openEyeIndex = sum( openEyeVals )
+    return hullImg, openEyeIndex
+
