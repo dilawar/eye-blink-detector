@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-"""blinky.py: 
-
-Starting point of blinky
+"""
+Detect eyeblinks in video.
 
 """
     
@@ -59,6 +58,26 @@ def get_region_of_interest( frame, method = 'box' ):
     else:
         return clip_frame( frame, box_ )
 
+def is_a_good_frame( frame ):
+    if frame.max( ) < 100 or frame.min() > 150:
+        print( '[WARN] not a good frame: too bright or dark' )
+        return False
+    if frame.mean( ) < 50 or frame.mean() > 200:
+        print( '[WARN] not a good frame: not much variation' )
+        return False
+    return True
+
+def fetch_a_good_frame(  ):
+    global cap_
+    ret, frame = cap_.read()
+    if ret:
+        if is_a_good_frame( frame ):
+            return frame
+        else:
+            return fetch_a_good_frame( )
+    else:
+        print( '[Warn] Failed to fetch a frame' )
+        return None
 
 def process( args ):
     global cap_
@@ -66,24 +85,26 @@ def process( args ):
     cap_ = cv2.VideoCapture( args.video_device )
     nFames = cap_.get( cv2.cv.CV_CAP_PROP_FRAME_COUNT )
     fps = float( cap_.get( cv2.cv.CV_CAP_PROP_FPS ) )
+
     print( '[INFO] FPS = %f' % fps )
-    ret, frame = cap_.read()
+    frame = fetch_a_good_frame( )
     frame = helper.toGrey( frame )
     box_, template_ = helper.get_bounding_box( frame )
     # box_ = [ (425, 252), (641, 420 ) ]
     # template_ = clip_frame( frame, box_ )
     # Now track the template in video
     blinkValues = [ ]
-    totalFramesDone = 1
     towrite = []
     csvFile = '%s_eye_bink_index.csv' % args.video_device 
     with open( csvFile, 'w') as f:
         f.write( 'time, open-eye\n')
+    
     while True:
-        ret, frame = cap_.read( )
-        if not ret:
+        totalFramesDone = cap_.get( cv2.cv.CV_CAP_PROP_POS_FRAMES ) 
+        if totalFramesDone + 1 >= nFames:
+            print( '== All done' )
             break
-        totalFramesDone += 1
+        frame = fetch_a_good_frame( )
         frame = helper.toGrey( frame )
         # print( template_.shape, resultFrame.shape )
         # display_frame( np.hstack( (resFromClipping, resFromTemplateMatch)), 10 )
