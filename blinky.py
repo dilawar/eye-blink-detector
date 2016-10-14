@@ -64,7 +64,9 @@ def process( args ):
     global cap_
     global box_, template_
     cap_ = cv2.VideoCapture( args.video_device )
-    nFames = cap.get( cv2.CV_CAP_PROP_FRAME_COUNT )
+    nFames = cap_.get( cv2.cv.CV_CAP_PROP_FRAME_COUNT )
+    fps = float( cap_.get( cv2.cv.CV_CAP_PROP_FPS ) )
+    print( '[INFO] FPS = %f' % fps )
     ret, frame = cap_.read()
     frame = helper.toGrey( frame )
     box_, template_ = helper.get_bounding_box( frame )
@@ -74,40 +76,44 @@ def process( args ):
     blinkValues = [ ]
     totalFramesDone = 1
     towrite = []
+    csvFile = '%s_eye_bink_index.csv' % args.video_device 
+    with open( csvFile, 'w') as f:
+        f.write( 'time, open-eye\n')
     while True:
         ret, frame = cap_.read( )
         if not ret:
-            continue
+            break
         totalFramesDone += 1
         frame = helper.toGrey( frame )
         # print( template_.shape, resultFrame.shape )
         # display_frame( np.hstack( (resFromClipping, resFromTemplateMatch)), 10 )
         roi = get_region_of_interest( frame )
-        eyeHull, eyeIndex= helper.compute_open_eye_index( roi )
-        display_frame( np.hstack( (roi, eyeHull) ), 1 )
-
+        eyeHull, eyeIndex = helper.compute_open_eye_index( roi )
         blinkValues.append( eyeIndex )
-        towrite.append( eyeIndex )
+        towrite.append( '%g,%g' % ((totalFramesDone / fps), eyeIndex ))
 
-        csvFile = '%s_eye_bink_index.csv' % args.video_device 
-        with open( csvFile, 'w') as f:
-            f.write( '# eye blink values of file %s' % args.video_device )
+        if args.verbose:
+            display_frame( np.hstack( (roi, eyeHull) ), 1 )
+
 
         if len( blinkValues ) % 100 == 0:
             print( '[INFO] Done %d out of %d frames.' % ( totalFramesDone
                 , nFames ) )
-            gp.plot( np.array( blinkValues[-1000:] )
-                , title = 'Open Eye index - last 1000 frames'
-                , cmds = 'set terminal x11'
-                )
             with open( csvFile, 'a' ) as f:
-                f.write( '\n'.join( towrite ) )
-                towrite = []
+                line = "%s\n" % ('\n'.join( towrite ) )
+                print( line )
+                f.write( line )
+            towrite = []
+            if args.verbose:
+                gp.plot( np.array( blinkValues[-1000:] )
+                    , title = 'Open Eye index - last 1000 frames'
+                    , terminal = 'x11'
+                    )
 
     # Also write the left-over values.
     with open( csvFile, 'a' ) as f:
         f.write( '\n'.join( towrite ) )
-        towrite = []
+
     print( '[INFO] Done writing data to %s' % csvFile )
     print( ' == All done from me folks' )
 
@@ -137,7 +143,7 @@ if __name__ == '__main__':
     parser.add_argument('--verbose', '-v'
         , required = False
         , action = 'store_true'
-        , default = True
+        , default = False
         , help = 'Show you whats going on?'
         )
     parser.parse_args(namespace=args)
