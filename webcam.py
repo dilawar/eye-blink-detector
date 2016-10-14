@@ -154,6 +154,7 @@ def get_bounding_box(frame):
             break
     cv2.waitKey(1)
     cv2.destroyWindow('Bound_eye')
+    print( 'Got box %s' % bbox_ )
     return bbox_
 
 def process_video(video_device,  args = {}):
@@ -168,10 +169,14 @@ def process_video(video_device,  args = {}):
     rawVec = []
     ret = False
     nFrames = 0
+    # Get the first frame for a bouding box.
     while not ret:
         ret, frame = cap.read()
         nFrames += 1
+
+    print( '[INFO] Draw a bounding box. Press "q" when done' )
     bbox_ = get_bounding_box(frame)
+
     while(cap.isOpened()):
         ret, frame = cap.read()
         try:

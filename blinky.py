@@ -19,25 +19,62 @@ import extract
 import webcam
 import pylab
 import numpy as np
+import cv2
+import helper
+
+
+cap_ = None
+box_ = None
+template_ = None
+
+def display_frame( frame, delay = 40 ):
+    cv2.imshow( 'frame', frame )
+    cv2.waitKey( delay )
+
+def clip_frame( frame, box ):
+    (r1, c1), (r2, c2 ) = box
+    return frame[c1:c2,r1:r2]
+
+def generate_box( (c,r), width, height ):
+    if width < 0: width = 10
+    if height < 0 : height = 10
+    leftCorner = ( max(0,c - width / 2), max(0, r - height / 2 ) )
+    rightCorner = (leftCorner[0] + width, leftCorner[1] + height)
+    return leftCorner, rightCorner 
+
+
+def process( args ):
+    global cap_
+    global box_, template_
+    cap_ = cv2.VideoCapture( args.video_device )
+    ret, frame = cap_.read()
+    frame = helper.toGrey( frame )
+    # box_, template_ = helper.get_bounding_box( frame )
+    box_ = [ (425, 252), (641, 420 ) ]
+    template_ = clip_frame( frame, box_ )
+    # Now track the template in video
+    while True:
+        ret, frame = cap_.read( )
+        frame = helper.toGrey( frame )
+        print template_.shape
+        tr, tc = template_.shape    # Rows and cols in template.
+        res = cv2.matchTemplate( frame, template_, cv2.TM_SQDIFF_NORMED )
+        minv, maxv, (ctopL, rtopL), maxl = cv2.minMaxLoc( res )
+        # (ctopL, rtopL) is the point where we have best match.
+        # box = generate_box( minl, tc, tr )
+        matchBox = ( ctopL, rtopL ), (ctopL + tc, rtopL + tr )
+        print( "Bounding box for result %s" % str(matchBox) )
+        resFromTemplateMatch = clip_frame( frame, matchBox )
+        resFromClipping = clip_frame( frame, box_ )
+        # print( template_.shape, resultFrame.shape )
+        display_frame( np.hstack( (resFromClipping, resFromTemplateMatch)), 10 )
+
+        
+
 
 def main(args):
     # Extract video first
-    data = webcam.video2csv(args)
-    if len(data) == 0:
-        print('[WARN] Could not load data. Quitting.')
-        return None
-    edgyBlinks = extract.find_blinks_using_edge(data)
-    outfile = "%s_blinks_using_edges.csv" % args['video_device']
-    print("[INFO] Writing to outfile %s" % outfile)
-    np.savetxt(outfile, np.array(edgyBlinks).T, delimiter=","
-            , header = "time,blinks")
-
-    pixalBlinks = extract.find_blinks_using_pixals(data)
-    outfile = "%s_blinks_using_pixals.csv" % args['video_file']
-    print("[INFO] Writing to outfile %s" % outfile)
-    np.savetxt(outfile, np.array(pixalBlinks).T, delimiter=","
-            , header = "time,blinks")
-
+    process( args )
 
 if __name__ == '__main__':
     import argparse
@@ -58,5 +95,5 @@ if __name__ == '__main__':
         , help = 'Bounding box : topx topy width height'
         )
     parser.parse_args(namespace=args)
-    main(vars(args))
+    main( args )
 
