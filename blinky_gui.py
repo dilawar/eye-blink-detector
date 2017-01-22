@@ -69,7 +69,12 @@ def init():
     global box_, fps_
     global cap_, args_
     videoFile = args_['video_file']
-    cap_ = cv2.VideoCapture(videoFile)
+    if os.path.isfile( video_file ):
+        cap_ = cv2.VideoCapture(videoFile)
+    else:
+        print( "Probably camera index" )
+        cap_ = cv2.VideoCapture(int(videoFile))
+
     fps_ = cap_.get(cv2.cv.CV_CAP_PROP_FPS)
     ret, fstFrame = cap_.read()
     box_ = webcam.get_bounding_box(fstFrame)
