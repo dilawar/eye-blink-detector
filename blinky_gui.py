@@ -15,6 +15,8 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import numpy as np
+import matplotlib
+matplotlib.use( 'TkAgg' )
 import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 import extract
@@ -97,6 +99,7 @@ def animate(i):
     global fig_ax_
 
     t = float(i) / fps_
+    print( 'At time %d, %f' % (i, t ))
     ret, img = cap_.read()
     (x0, y0), (x1, y1) = box_
     try:
@@ -142,7 +145,6 @@ def get_blinks( ):
         , init_func=init
         , blit = False
         )
-
     if save_video_:
         print("Writing to video file output.mp4")
         ani_.save('output.mp4', fps=10, extra_args=['-vcodec', 'libx264'])
@@ -156,11 +158,12 @@ def main():
         quit()
 
     try:
+        print( 'Finding blinks' )
         get_blinks()
     except Exception as e:
         print( '[WARN] Failed to get blinks: %s' % e )
         pass
-    cap_.release()
+    # cap_.release()
     outfile = '%s_out.csv' % vidFile
     print("[INFO] Writing to file %s" % outfile)
     np.savetxt(outfile, data_, delimiter=',' ,header="time,edge,pixal")

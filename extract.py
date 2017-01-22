@@ -124,7 +124,7 @@ def find_blinks_using_edge(data, plot = False, **kwargs):
 def find_blinks_using_pixals(data, plot = False):
     t, y, w = data[:,0], data[:,1], data[:,2]
     windowSizeSec = 6
-    N = windowSizeSec*32.0
+    N = int(windowSizeSec*32.0)
     window = np.ones(N)/N
     try:
         smoothW = np.convolve(w, window, 'valid')
