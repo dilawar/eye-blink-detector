@@ -69,7 +69,7 @@ def init():
     global box_, fps_
     global cap_, args_
     videoFile = args_['video_file']
-    if os.path.isfile( video_file ):
+    if os.path.isfile( videoFile ):
         cap_ = cv2.VideoCapture(videoFile)
     else:
         print( "Probably camera index" )

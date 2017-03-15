@@ -33,7 +33,7 @@ def main(args):
             , header = "time,blinks")
 
     pixalBlinks = extract.find_blinks_using_pixals(data)
-    outfile = "%s_blinks_using_pixals.csv" % args['video_file']
+    outfile = "%s_blinks_using_pixals.csv" % args['video_device']
     print("[INFO] Writing to outfile %s" % outfile)
     np.savetxt(outfile, np.array(pixalBlinks).T, delimiter=","
             , header = "time,blinks")
@@ -42,7 +42,7 @@ def main(args):
 if __name__ == '__main__':
     import argparse
     # Argument parser.
-    description = '''description'''
+    description = '''Detect eye-blinks in recording (optimized for mouse eye)'''
     parser = argparse.ArgumentParser(description=description)
     class Args: pass 
     args = Args()
