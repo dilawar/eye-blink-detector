@@ -136,20 +136,30 @@ def find_blinks_using_pixals(data, plot = False):
         pylab.plot(t, w, linewidth=0.5, label = "W")
 
     # Shift because of convolution.
-    x = int(N) / 2
-    bT, yy = t[x-1:-x], w[x-1:-x] - smoothW
+    x = int( N / 2 )
+    try:
+        bT, yy = t[x-1:-x], w[x-1:-x] - smoothW
+    except Exception as e:
+        print( '[WARN] error when using smoothing window %s' % smoothW )
+        return
 
     if plot:
-        pylab.plot(bT, smoothW, linewidth=2, label = "Smooth W")
-        pylab.legend()
-        pylab.subplot(2, 1, 2)
+        try:
+            pylab.plot(bT, smoothW, linewidth=2, label = "Smooth W")
+            pylab.legend()
+            pylab.subplot(2, 1, 2)
+        except Exception as e:
+            print( "Failed to plot %s" % e )
 
     win = np.ones(2) / 2.0
     yy = np.convolve(yy, win, 'same')
     yy = (yy + np.fabs(yy))
     if plot:
-        pylab.plot(bT, yy, linewidth=1, alpha=0.4, label = "W - Smooth W")
-        pylab.legend()
+        try:
+            pylab.plot(bT, yy, linewidth=1, alpha=0.4, label = "W - Smooth W")
+            pylab.legend()
+        except Exception as e:
+            print( "Failed to plot %s" % e )
 
     # Find blink in this data.
     blinks = []
