@@ -25,7 +25,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG,
     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
     datefmt='%m-%d %H:%M',
-    filename='default.log',
+    filename='_blinky.log',
     filemode='w')
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)
@@ -171,15 +171,18 @@ def process_video(video_device,  args = {}):
     while not ret:
         ret, frame = cap.read()
         nFrames += 1
+
     bbox_ = get_bounding_box(frame)
+
     while(cap.isOpened()):
         ret, frame = cap.read()
         try:
             gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
         except Exception as e:
-            _logger.warn("can't convert frame %s to grayscale. Done" % nFrames)
+            _logger.warn("can't convert frame %d to grayscale. Ignoring" % nFrames)
             print(e)
-            break
+            continue 
+
         nRows, nCols = gray.shape
         (x0, y0), (x1, y1) = bbox_
         gray = gray[y0:y1,x0:x1]
@@ -196,9 +199,10 @@ def process_video(video_device,  args = {}):
         vec.append(res)
         rawVec.append(s)
         result = np.concatenate((infile, outfile), axis=1)
-        #cv2.imshow('Bound_eye', result)
+        cv2.imshow('Bound_eye', result)
         if wait_for_exit_key():
             break
+
     cv2.destroyAllWindows()
     if os.path.isfile( str(video_device) ):
         outfile = "%s_out.csv" % (video_device)
