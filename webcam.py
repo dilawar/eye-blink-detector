@@ -51,8 +51,12 @@ def get_ellipse(cnts):
 def merge_contours(cnts, img):
     """Merge these contours together. And create an image"""
     for c in cnts:
-        hull = cv2.convexHull(c)
-        cv2.fillConvexPoly(img, hull, 0)
+        try:
+            hull = cv2.convexHull(c)
+            cv2.fillConvexPoly(img, hull, 0)
+        except Exception as e:
+            print( '[ERR] Contour merging failed with error %s' % e)
+            return img
     return img
 
 def draw_stars(current, max_lim):
@@ -107,10 +111,15 @@ def process_frame(frame):
     hullImg = np.ones(frame.shape)
     res = []
     for c in cnts[0]:
-        c = cv2.convexHull(c)
+        try:
+            c = cv2.convexHull(c)
+        except Exception as e:
+            print( '[ERR] Failed to compute convex-hull with error %s' % e )
+            continue
         if accept_contour_as_possible_eye( c ):
             cv2.fillConvexPoly(hullImg, c, 0, 8)
             res.append(cv2.contourArea(c))
+
     hullImg = np.array((1-hullImg) * 255, dtype = np.uint8)
     return frame, hullImg, sum(res), s
 

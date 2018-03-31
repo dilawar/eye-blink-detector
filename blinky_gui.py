@@ -64,6 +64,17 @@ y1_ = []
 y2_ = []
 args_ = None
 
+# Find OpenCV version
+major_ver, minor_ver, subminor_ver = cv2.__version__.split('.')
+
+def get_fps( video ):
+    if int(major_ver)  < 3:
+        fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
+    else:
+        fps = video.get(cv2.CAP_PROP_FPS)
+    return fps
+
+
 def init():
     global axes_, lines_
     global box_, fps_
@@ -75,7 +86,7 @@ def init():
         print( "Probably camera index" )
         cap_ = cv2.VideoCapture(int(videoFile))
 
-    fps_ = cap_.get(cv2.cv.CV_CAP_PROP_FPS)
+    fps_ = get_fps( cap_ )
     ret, fstFrame = cap_.read()
     box_ = webcam.get_bounding_box(fstFrame)
     cv2.destroyWindow('Bound_eye')
