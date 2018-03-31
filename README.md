@@ -1,3 +1,14 @@
+# Dependencies 
+
+This project has moved to opencv version 3.0.0 or higher.
+
+- opencv-python  
+- gnuplotlib. Use the command `sudo pip install gnuplotlib` 
+- gnuplot
+
+__gnulotlib may not work on python3.__
+
+
 First frame of video/camera is presented to the user to select the box where
 your eyes it. Use mouse to left-click at a point, drag the cursor to another
 point, and release the left-button. You won't see a box unless you are done
@@ -23,9 +34,4 @@ Gui version of blinky.py. Only for testing and demo purposes. Very slow.
 
 Process the live feed from given camera index ( default 0 ). Only for demo
 purpose. 
-
-## Dependencies
-
-- gnuplotlib. Use the command `sudo pip install gnuplotlib` 
-- gnuplot
 
