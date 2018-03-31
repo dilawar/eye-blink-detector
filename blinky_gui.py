@@ -137,20 +137,22 @@ def animate(i):
     lines_['rawA'].set_data(tvec_, y1_)
     lines_['rawB'].set_data(tvec_, y2_)
     
+    # update every 5 seconds.
     if i % int(fps_) == 0 and i > int(fps_)*5:
-        data_ = np.array((tvec_, y1_, y2_)).T
         success = True
+        data_ = np.array((tvec_, y1_, y2_)).T
+        if data_ is None:
+            success = False 
         try:
             tA, bA = extract.find_blinks_using_edge(data_[:,:])
         except Exception as e:
-            print( "[WARN ] Failed to detect blink. Error was %s" % e )
+            print( "[WARN ] Failed to detect blink (edges). Error was %s" % e )
             success = False
         try:
             tB, bB = extract.find_blinks_using_pixals(data_[:,:])
         except Exception as e:
-            print( "[WARN ] Failed to detect blink. Error was %s" % e)
+            print( "[WARN ] Failed to detect blink (pixals). Error was %s" % e)
             success = False
-
         if success:
             update_axis_limits(axes_['blink'], t, 1)
             update_axis_limits(axes_['blink_twin'], t, 1)
