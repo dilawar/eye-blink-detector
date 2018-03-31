@@ -139,12 +139,23 @@ def animate(i):
     
     if i % int(fps_) == 0 and i > int(fps_)*5:
         data_ = np.array((tvec_, y1_, y2_)).T
-        tA, bA = extract.find_blinks_using_edge(data_[:,:])
-        tB, bB = extract.find_blinks_using_pixals(data_[:,:])
-        update_axis_limits(axes_['blink'], t, 1)
-        update_axis_limits(axes_['blink_twin'], t, 1)
-        lines_['blinkA'].set_data(tA, 0.9*np.ones(len(tA)))
-        lines_['blinkB'].set_data(tB, np.ones(len(tB)))
+        success = True
+        try:
+            tA, bA = extract.find_blinks_using_edge(data_[:,:])
+        except Exception as e:
+            print( "[WARN ] Failed to detect blink. Error was %s" % e )
+            success = False
+        try:
+            tB, bB = extract.find_blinks_using_pixals(data_[:,:])
+        except Exception as e:
+            print( "[WARN ] Failed to detect blink. Error was %s" % e)
+            success = False
+
+        if success:
+            update_axis_limits(axes_['blink'], t, 1)
+            update_axis_limits(axes_['blink_twin'], t, 1)
+            lines_['blinkA'].set_data(tA, 0.9*np.ones(len(tA)))
+            lines_['blinkB'].set_data(tB, np.ones(len(tB)))
 
     time_text_.set_text(time_template_ % t)
     return lines_.values(), time_text_
