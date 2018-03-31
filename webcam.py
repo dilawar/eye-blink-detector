@@ -100,17 +100,21 @@ def process_frame(frame):
     # Find edge in frame
     s = np.mean(frame)
     edges = cv2.Canny(frame, 50, 250)
-    cnts = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
-    cntImg = np.ones(frame.shape)
-    merge_contours(cnts[0], cntImg)
+
+    img, cnts, heir = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
+    cntImg = np.ones( frame.shape, dtype = np.uint8 )
+    merge_contours(cnts, cntImg)
 
     # cool, find the contour again and convert again. Sum up their area.
     im = np.array((1-cntImg) * 255, dtype = np.uint8)
-    cnts = cv2.findContours(im, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    img, cnts, heir = cv2.findContours(im, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
     hullImg = np.ones(frame.shape)
     res = []
-    for c in cnts[0]:
+    for c in cnts:
+        #  print( 'Convex hull', c )
+        if c.all() or len(c) < 4:
+            continue
         try:
             c = cv2.convexHull(c)
         except Exception as e:
